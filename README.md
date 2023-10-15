@@ -10,7 +10,7 @@ MONGO_URI = "mongodb+srv://johanrincondev:<password>@johancluster.e3lbz6l.mongod
 PORT = 3001
 BASE_URL="/api/v1"
 
-Esto para hacer la conección de la mongoDB
+Esto para hacer la conexión de la mongoDB
 No olvidar reemplazar <password> con la contraseña real de la bdd
 
 ### docker-compose build & docker-compose up
