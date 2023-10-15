@@ -16,22 +16,18 @@ const io = socketIO(server, {
   }
 });
 
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 io.on('connection', (socket) => {
   console.log('A client connected.');
-
-  socket.on('message', (message) => {
-    // Broadcast the received message to all connected clients
-    io.emit('message', message);
-  });
 
   socket.on('disconnect', () => {
     console.log('A client disconnected.');
   });
 });
-
-app.post('/api/v1/websocket', (req, res) => {
-  io.emit('message', 'order created')
-})
 
 const connectDB = require('./db/connect');
 

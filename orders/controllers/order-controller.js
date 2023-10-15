@@ -6,7 +6,8 @@ const {
   getSingleService,
   updateService,
   deleteService,
-  createService
+  createService,
+  deleteAllService
 } = require('../services/order-service')
 
 const getAllOrders = async (req, res) => {
@@ -32,7 +33,7 @@ const getOrder = async (req, res) => {
 
 const createOrder = async (req, res) => {
   try {
-    await createService(req.body, res)
+    await createService(req.body, req, res)
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -61,10 +62,21 @@ const deleteOrder = async (req, res) => {
   }
 }
 
+const deleteAllOrders = async (req, res) => {
+  try {
+    await deleteAllService(req, res)
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json(error)
+  }
+}
+
 module.exports = {
   getAllOrders,
   getOrder,
   updateOrder,
   deleteOrder,
-  createOrder
+  createOrder,
+  deleteAllOrders
 }

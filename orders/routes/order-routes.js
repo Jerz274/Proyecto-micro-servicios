@@ -6,11 +6,12 @@ const {
   getOrder,
   updateOrder,
   deleteOrder,
-  createOrder
+  createOrder,
+  deleteAllOrders
 } = require('../controllers/order-controller')
 
 
-router.route('/').post(createOrder).get(getAllOrders)
+router.route('/').post(createOrder).get(getAllOrders).delete(deleteAllOrders)
 router.route('/:id').get(getOrder).patch(updateOrder).delete(deleteOrder)
 
 module.exports = router

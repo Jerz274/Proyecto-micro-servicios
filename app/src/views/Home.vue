@@ -7,7 +7,7 @@
         </th>
       </thead>
       <tbody>
-        <tr v-for="order in orders.orders" :key="order.id">
+        <tr v-for="order in orders" :key="order.id">
           <td>
             {{ order._id }}
           </td>
@@ -23,19 +23,8 @@
     <button @click="createAction">
       Press to generate order.
     </button>
-    {{ boughtMsg }}
   </div>
 </template>
-
-<style>
-th,
-td {
-  padding: 6px 12px;
-  text-align: center;
-  border: 1px solid black;
-  border-radius: 3px;
-}
-</style>
 
 <script setup>
 import { ref, onMounted, toRaw } from 'vue';
@@ -46,7 +35,6 @@ import { buyIngredients } from '../utils'
 // Use an environment variable for the WebSocket URL
 const socket = io('http://localhost:3001');
 
-const messages = ref([]);
 const orders = ref([]);
 
 const headers = [
@@ -54,9 +42,36 @@ const headers = [
   'Order Status',
   'Recipe Name',
 ]
-socket.on('message', (message) => {
-  messages.value.push(message);
+
+const getOrders = async () => {
+  const data = await toRaw(db_get('/orders'))
+  orders.value = data.orders
+  console.log(data.orders)
+}
+
+onMounted(async () => {
+  getOrders()
+})
+
+socket.on('order_created', (data) => {
+  getOrders()
 });
+
+const order_counter = ref(0)
+const boughtMsg = ref('')
+const quantityMsg = ref('')
+
+const createAction = async () => {
+  //escoge receta aleatoria
+  //revisa cantidades de cada ingrediente necesario 
+  //Si hay suficientes -> agregar orden a tabla
+  //No hay suficientes -> buyIngredients('tomato') 
+  await db_post('/orders', {
+    "recipe": "652bec16163bd11f22b03cfc",
+    "status": "pending"
+  })
+  const data = await toRaw(buyIngredients('tomato'))
+}
 
 onMounted(() => {
   socket.on('connect', () => {
@@ -67,18 +82,14 @@ onMounted(() => {
     console.log('Disconnected from the Socket.io server.');
   });
 });
-
-onMounted(async () => {
-  const data = await toRaw(db_get('/orders'))
-  orders.value = data
-})
-
-const order_counter = ref(0)
-const boughtMsg = ref('')
-const quantityMsg = ref('')
-
-const createAction = async () => {
-  const data = await toRaw(buyIngredients('tomato'))
-  boughtMsg.value = `${data.message}->${JSON.stringify(data.data)}`
-}
 </script>
+
+<style>
+th,
+td {
+  padding: 6px 12px;
+  text-align: center;
+  border: 1px solid black;
+  border-radius: 3px;
+}
+</style>

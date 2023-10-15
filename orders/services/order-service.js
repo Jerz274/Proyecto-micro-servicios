@@ -21,9 +21,11 @@ const getSingleService = async (id, res) => {
   }
 }
 
-const createService = async (body, res) => {
-  console.log(body)
+const createService = async (body, req, res) => {
+  const io = req.io
   const order = await Order.create(body)
+  // await order.populate('recipe').execPopulate()
+  io.emit('order_created', order)
   res
     .status(StatusCodes.OK)
     .json({
@@ -63,10 +65,21 @@ const deleteService = async (id, res) => {
     })
 }
 
+const deleteAllService = async (id, res) => {
+  const order = await Order.deleteMany({})
+  res
+    .status(StatusCodes.OK)
+    .json({
+      message: "All orders successfully deleted",
+      order
+    })
+}
+
 module.exports = {
   getAllService,
   getSingleService,
   updateService,
   deleteService,
-  createService
+  createService,
+  deleteAllService
 } 
