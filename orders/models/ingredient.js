@@ -9,6 +9,10 @@ const IngredientSchema = new mongoose.Schema(
       minLength: 1,
       maxLength: 50,
       unique: [true, 'Ingredient already exists']
+    },
+    quantities: {
+      type: Number,
+      default: 3
     }
   }, { timestamps: true }
 )

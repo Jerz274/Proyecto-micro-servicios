@@ -57,7 +57,6 @@ export const db_post = async (endpoint, body) => {
 
     const data = await resp.json();
     if (resp.status == 200) {
-      console.log(data)
       return data
     } else {
       console.error("Error during fetch")

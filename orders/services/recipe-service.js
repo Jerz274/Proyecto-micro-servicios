@@ -3,12 +3,12 @@ const { StatusCodes } = require('http-status-codes')
 const Recipe = require('../models/recipe')
 
 const getAllService = async (req, res) => {
-  const recipes = await Recipe.find({}).populate('ingredients')
+  const recipes = await Recipe.find({}).populate('ingredients._id').exec()
   res.status(StatusCodes.OK).json({ recipes })
 }
 
 const getSingleService = async (id, res) => {
-  const recipe = await Recipe.findById(id).populate('ingredients')
+  const recipe = await Recipe.findById(id).populate('ingredients._id')
   if (recipe) {
     res.status(StatusCodes.OK).json({ recipe })
   } else {
@@ -22,6 +22,7 @@ const getSingleService = async (id, res) => {
 
 const createService = async (body, res) => {
   const { name, ingredients } = body
+  console.log(body)
   if (!name) {
     res
       .status(StatusCodes.BAD_REQUEST)
@@ -69,7 +70,7 @@ const updateService = async (id, body, res) => {
 }
 
 const deleteService = async (id, res) => {
-  const recipe = await Recipe.findOneAndDelete({ _id: id }).populate('ingredients')
+  const recipe = await Recipe.findOneAndDelete({ _id: id }).populate('ingredients._id')
   res
     .status(StatusCodes.OK)
     .json({

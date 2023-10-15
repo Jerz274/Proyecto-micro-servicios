@@ -36,6 +36,7 @@ import { buyIngredients } from '../utils'
 const socket = io('http://localhost:3001');
 
 const orders = ref([]);
+const recipes = ref([])
 
 const headers = [
   'Order ID',
@@ -46,30 +47,53 @@ const headers = [
 const getOrders = async () => {
   const data = await toRaw(db_get('/orders'))
   orders.value = data.orders
-  console.log(data.orders)
+}
+const getRecipes = async () => {
+  const data = await toRaw(db_get('/recipes'))
+  recipes.value = data.recipes
 }
 
 onMounted(async () => {
   getOrders()
+  getRecipes()
 })
 
 socket.on('order_created', (data) => {
   getOrders()
 });
 
-const order_counter = ref(0)
-const boughtMsg = ref('')
-const quantityMsg = ref('')
+
 
 const createAction = async () => {
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+  }
   //escoge receta aleatoria
+  let rand = getRandomInt(0, recipes.value.length - 1)
+  // console.log(rand)
+  const recipe = toRaw(recipes.value[rand])
+  // console.log(recipe)
+  //basic order creation
+  await db_post('/orders', {
+    "recipe": `${recipe._id}`,
+    "status": "pending"
+  })
+  const ingredients = toRaw(recipe.ingredients)
+  let ingredientNames = []
+  ingredients.forEach(async (item) => {
+    const data = await toRaw(db_get(`/ingredients/${item.ingredient}`))
+    const obj = {
+      name: data.ingredient.name,
+      quantity: item.quantities
+    }
+    console.log("obj", obj)
+    ingredientNames.push(obj)
+  })
+  console.log(ingredientNames)
+  // console.log(recipe.ingredients)
   //revisa cantidades de cada ingrediente necesario 
   //Si hay suficientes -> agregar orden a tabla
   //No hay suficientes -> buyIngredients('tomato') 
-  await db_post('/orders', {
-    "recipe": "652bec16163bd11f22b03cfc",
-    "status": "pending"
-  })
   const data = await toRaw(buyIngredients('tomato'))
 }
 

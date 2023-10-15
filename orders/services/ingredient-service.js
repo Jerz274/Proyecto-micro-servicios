@@ -8,16 +8,17 @@ const getAllService = async (req, res) => {
 }
 
 const getSingleService = async (id, res) => {
-  const ingredient = await Ingredient.findById(id)
-  if (ingredient) {
-    res.status(StatusCodes.OK).json({ ingredient })
-  } else {
-    res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({
-        error: `Ingredient with id <${id}> does not exist`
-      })
+  try {
+    const ingredient = await Ingredient.findById(id);
+    if (!ingredient) {
+      return res.status(StatusCodes.NOT_FOUND).json({ error: 'Ingredient not found' });
+    }
+    res.status(StatusCodes.OK).json({ ingredient });
+  } catch (error) {
+    console.error(error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
   }
+
 }
 
 const createService = async (body, res) => {
@@ -55,10 +56,7 @@ const updateService = async (id, body, res) => {
     .status(StatusCodes.OK)
     .json({
       message: "ingredient successfully updated!",
-      ingredient: {
-        id: ingredient._id,
-        name: ingredient.name,
-      }
+      ingredient
     })
 }
 
