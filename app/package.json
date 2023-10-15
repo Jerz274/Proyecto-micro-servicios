@@ -1,0 +1,26 @@
+{
+  "name": "app",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "node-sass": "^9.0.0",
+    "pinia": "^2.1.6",
+    "sass-loader": "^13.3.2",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5",
+    "vue3-cookies": "^1.0.6"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.2.3",
+    "sass": "^1.69.3",
+    "vite": "^4.4.5"
+  }
+}

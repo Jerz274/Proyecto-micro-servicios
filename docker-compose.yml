@@ -1,0 +1,36 @@
+version: "3"
+services:
+  orders:
+    build:
+      dockerfile: Dockerfile
+      context: ./orders
+    container_name: orders
+    ports:
+      - "3001:3001"
+    restart: always
+    # depends_on:
+    #   - "nosql-db"
+    volumes:
+      - .:/app
+      - /app/orders/node_modules
+  vue-app:
+    build:
+      dockerfile: Dockerfile
+      context: ./app
+    container_name: app
+    ports:
+      - "3000:3000"
+    restart: always
+    # depends_on:
+    #   - "nosql-db"
+    volumes:
+      - .:/app
+      - /app/app/node_modules
+  nginx-proxy:
+    build:
+      dockerfile: Dockerfile
+      context: ./gateway
+    depends_on:
+      - orders
+    ports:
+      - 80:80

@@ -1,0 +1,13 @@
+/*Fonts*/
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Noto+Sans+JP:wght@600&display=swap');
+
+* {
+  font-family: montserrat, Arial, Helvetica, sans-serif;
+}
+
+*::after,
+*::before {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
