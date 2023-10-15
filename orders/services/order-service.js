@@ -22,9 +22,8 @@ const getSingleService = async (id, res) => {
 }
 
 const createService = async (body, req, res) => {
-  const io = req.io
   const order = await Order.create(body)
-  // await order.populate('recipe').execPopulate()
+  const io = req.io
   io.emit('order_created', order)
   res
     .status(StatusCodes.OK)
@@ -34,7 +33,7 @@ const createService = async (body, req, res) => {
     })
 }
 
-const updateService = async (id, body, res) => {
+const updateService = async (id, body, req, res) => {
   const order = await Order
     .findOneAndUpdate(
       { _id: id },
@@ -44,6 +43,9 @@ const updateService = async (id, body, res) => {
         runValidators: true
       }
     ).populate('recipe').lean()
+
+  const io = req.io
+  io.emit('order_updated', order)
   res
     .status(StatusCodes.OK)
     .json({

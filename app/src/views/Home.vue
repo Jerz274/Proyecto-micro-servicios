@@ -7,11 +7,14 @@
         </th>
       </thead>
       <tbody>
-        <tr v-for="order in orders" :key="order.id">
+        <tr v-for="(order, index) in orders" :key="order.id">
+          <td>
+            {{ index + 1 }}
+          </td>
           <td>
             {{ order._id }}
           </td>
-          <td>
+          <td :class="chooseClass(order.status)">
             {{ order.status }}
           </td>
           <td>
@@ -29,16 +32,26 @@
 <script setup>
 import { ref, onMounted, toRaw } from 'vue';
 import io from 'socket.io-client';
-import { db_get, db_post } from '../api';
+import { db_get, db_post, db_patch } from '../api';
 import { buyIngredients } from '../utils'
 
 // Use an environment variable for the WebSocket URL
+const chooseClass = (status) => {
+  if (status == 'cancelled') {
+    return 'red'
+  } else if (status === 'completed') {
+    return 'green'
+  } else {
+    return 'yellow'
+  }
+}
 const socket = io('http://localhost:3001');
 
 const orders = ref([]);
 const recipes = ref([])
 
 const headers = [
+  'Number',
   'Order ID',
   'Order Status',
   'Recipe Name',
@@ -61,6 +74,9 @@ onMounted(async () => {
 socket.on('order_created', (data) => {
   getOrders()
 });
+socket.on('order_updated', (data) => {
+  getOrders()
+});
 
 
 
@@ -74,27 +90,46 @@ const createAction = async () => {
   const recipe = toRaw(recipes.value[rand])
   // console.log(recipe)
   //basic order creation
-  await db_post('/orders', {
+  const newOrder = await db_post('/orders', {
     "recipe": `${recipe._id}`,
     "status": "pending"
   })
+  const newOrderData = newOrder.order
   const ingredients = toRaw(recipe.ingredients)
   let ingredientNames = []
-  ingredients.forEach(async (item) => {
-    const data = await toRaw(db_get(`/ingredients/${item.ingredient}`))
+  for (const ingredient of ingredients) {
+    const data = await toRaw(db_get(`/ingredients/${ingredient.ingredient}`))
     const obj = {
       name: data.ingredient.name,
-      quantity: item.quantities
+      quantity: ingredient.quantities
     }
-    console.log("obj", obj)
     ingredientNames.push(obj)
-  })
-  console.log(ingredientNames)
-  // console.log(recipe.ingredients)
-  //revisa cantidades de cada ingrediente necesario 
-  //Si hay suficientes -> agregar orden a tabla
-  //No hay suficientes -> buyIngredients('tomato') 
-  const data = await toRaw(buyIngredients('tomato'))
+  }
+  // console.log(recipe)
+  const ingredientsInDB = await toRaw(db_get(`/ingredients`))
+
+  let state = ""
+  for (const ingredientInDB of ingredientsInDB.ingredients) {
+    for (const ingredientName of ingredientNames) {
+      if (ingredientName.name === ingredientInDB.name) {
+        if (ingredientName.quantity <= ingredientInDB.quantities) {
+          state = "completed"
+          break
+        } else {
+          const data = await toRaw(buyIngredients(ingredientName.name))
+          if (data.data[ingredientName.name] == 0) {
+            state = "cancelled"
+            break
+          }
+        }
+      }
+    }
+  }
+
+  await toRaw(db_patch(`/orders/${newOrderData._id}`, {
+    status: state
+  }))
+
 }
 
 onMounted(() => {
@@ -115,5 +150,17 @@ td {
   text-align: center;
   border: 1px solid black;
   border-radius: 3px;
+}
+
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
+}
+
+.yellow {
+  color: yellow;
 }
 </style>

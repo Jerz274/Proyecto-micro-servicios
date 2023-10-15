@@ -43,7 +43,7 @@ const createOrder = async (req, res) => {
 const updateOrder = async (req, res) => {
   try {
     const { id: orderID } = req.params
-    await updateService(orderID, req.body, res)
+    await updateService(orderID, req.body, req, res)
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
